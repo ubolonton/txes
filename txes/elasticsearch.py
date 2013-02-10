@@ -84,7 +84,7 @@ class ElasticSearch(object):
             d.addCallback(sendIt)
             return d
         else:
-            return sendIt()
+            return sendIt(None)
 
     def _sendRequest(self, method, path, body=None, params=None):
         d = defer.maybeDeferred(self.connection.execute,
