@@ -84,7 +84,7 @@ class ElasticSearch(object):
             d.addCallback(sendIt)
             return d
         else:
-            return sendIt()
+            return sendIt(None)
 
     def _sendRequest(self, method, path, body=None, params=None):
         d = defer.maybeDeferred(self.connection.execute,
@@ -311,7 +311,7 @@ class ElasticSearch(object):
                   "refesh": refresh,
                   "flush": flush}
         if maxNumSegments:
-            params["max_num_segments"] = maxNumSegement
+            params["max_num_segments"] = maxNumSegments
         d = self._sendRequest("POST", path, params=params)
         d.addCallback(done)
         return d
@@ -374,7 +374,7 @@ class ElasticSearch(object):
             self.info['server'] = {}
             self.info['server']['name'] = result['name']
             self.info['server']['version'] = result['version']
-            self.info['allinfo'] = ressult
+            self.info['allinfo'] = result
             self.info['status'] = self.status(["_all"])
             return self.info
 
@@ -523,7 +523,7 @@ class ElasticSearch(object):
         if not len(self.bulkData):
             return defer.succeed(None)
 
-        data = '\n'.join(self.bulkData)
+        data = '\n'.join(self.bulkData) + '\n'
         d = self._sendRequest("POST", "/_bulk", body=data)
         self.bulkData = []
         return d
@@ -556,7 +556,7 @@ class ElasticSearch(object):
 
         path = self._makePath([','.join(indices), ','.join(docTypes),
                                "_query"])
-        d = self._sendRequest("DELETE", path, body=body, params=params)
+        d = self._sendRequest("DELETE", path, params=params)
         return d
 
     def deleteMapping(self, index, docType):
@@ -644,6 +644,7 @@ class ElasticSearch(object):
         """
         indices = self._balidateIndexes(indexes)
         d = self._sendQuery("_count", query, indices, docTypes, **params)
+        return d
 
     def createRiver(self, river, riverName=None):
         """
@@ -655,7 +656,7 @@ class ElasticSearch(object):
                               body=river)
         return d
 
-    def deleteRiver(seld, river, riverName=None):
+    def deleteRiver(self, river, riverName=None):
         """
         Delete a river
         """
@@ -664,7 +665,7 @@ class ElasticSearch(object):
         d = self._sendRequest("DELETE", "/_river/%s/" % riverName)
         return d
 
-    def moreLikeThis(seld, index, docType, id, fields, **params):
+    def moreLikeThis(self, index, docType, id, fields, **params):
         """
         Execute a "more like this" search query against on eor more fields.
         """
