@@ -47,6 +47,10 @@ class JSONReceiver(protocol.Protocol):
         self.writter = codecs.getwriter("utf_8")(StringIO.StringIO())
 
     def dataReceived(self, bytes):
+        # Unicode handling in python is a big mess
+        if isinstance(bytes, str):
+            self.writter.write(unicode(bytes, "utf-8"))
+        else:
         self.writter.write(bytes)
 
     def connectionLost(self, reason):
@@ -57,7 +61,7 @@ class JSONReceiver(protocol.Protocol):
                 data = {"error": reason}
             self.deferred.callback(data)
         else:
-            self.deffered.errback(reason)
+            self.deferred.errback(reason)
 
 
 class HTTPConnection(object):
