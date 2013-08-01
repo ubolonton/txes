@@ -642,7 +642,7 @@ class ElasticSearch(object):
         """
         Execute a query against one or more indices and get the hit count
         """
-        indices = self._balidateIndexes(indexes)
+        indices = self._validateIndexes(indexes)
         d = self._sendQuery("_count", query, indices, docTypes, **params)
         return d
 
