@@ -356,13 +356,13 @@ class ElasticSearch(object):
         Get the mapping definition
         """
         indices = self._validateIndexes(indexes)
-        path = [','.join(indices)]
+        parts = [','.join(indices)]
 
         if docType:
-            path.append(docType)
+            parts.append(docType)
 
-        path.append("_mapping")
-        d = self._sendRequest("GET", path)
+        parts.append("_mapping")
+        d = self._sendRequest("GET", self._makePath(parts))
         return d
 
     def collectInfo(self):
