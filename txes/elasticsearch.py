@@ -4,6 +4,7 @@ from twisted.internet import defer, reactor
 
 from txes import connection, exceptions
 
+# TODO: Custom/better json serialiazation (e.g. handle date)
 
 class ElasticSearch(object):
     """
@@ -587,13 +588,14 @@ class ElasticSearch(object):
         d = self._sendQuery("_search", query, indices, docType, **params)
         return d
 
-    def scan(self, query, indexes=None, docTypes=None, scrollTimeout="10m",
+    def scan(self, query, indexes=None, docType=None, scrollTimeout="10m",
              **params):
         """
         Return an iterator which will scan against one or more indices.
         Each call to next() will yeild a deferred that will contain the
         next dataset
         """
+        this = self
 
         class Scroller(object):
             def __init__(self, results):
@@ -610,16 +612,16 @@ class ElasticSearch(object):
 
             def next(self):
                 scrollId = self.results["_scroll_id"]
-                d = self._send_request("GET", "_search/scroll", scrollId,
+                d = this._sendRequest("GET", "_search/scroll", scrollId,
                                        {"scroll": scrollTimeout})
                 d.addCallback(self._setResults)
-                return
+                return d
 
         def scroll(results):
             return Scroller(results)
 
-        d = self.search(query=query, indexes=indexes, docTypes=docTypes,
-                        searchTypes="scan", scroll=scrollTimeout, **params)
+        d = self.search(query=query, indexes=indexes, docType=docType,
+                        search_type="scan", scroll=scrollTimeout, **params)
         d.addCallback(scroll)
         return d
 
