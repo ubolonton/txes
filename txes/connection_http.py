@@ -51,7 +51,7 @@ class JSONReceiver(protocol.Protocol):
         if isinstance(bytes, str):
             self.writter.write(unicode(bytes, "utf-8"))
         else:
-        self.writter.write(bytes)
+            self.writter.write(bytes)
 
     def connectionLost(self, reason):
         if reason.check(client.ResponseDone, http.PotentialDataLoss):
